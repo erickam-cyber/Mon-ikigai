@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Ikigai & Plan d'Action</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --passion: #ff7675; --talent: #74b9ff;
+            --mission: #55efc4; --argent: #ffeaa7;
+            --dark: #2d3436; --action: #a29bfe;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .app-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 850px;
+            width: 100%;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .card {
+            padding: 15px;
+            border-radius: 12px;
+            background: #fff;
+            border: 2px solid #eee;
+        }
+        textarea {
+            width: 100%;
+            height: 60px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            margin-top: 10px;
+            resize: none;
+            background: transparent;
+        }
+        .c-love { border-color: var(--passion); }
+        .c-good { border-color: var(--talent); }
+        .c-need { border-color: var(--mission); }
+        .c-paid { border-color: var(--argent); }
+
+        .action-steps {
+            background: #f9f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed var(--action);
+            margin-top: 20px;
+        }
+        .action-steps h3 { margin-top: 0; color: #6c5ce7; }
+        .action-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Design de la carte Exportable */
+        #ikigai-capture {
+            margin-top: 30px;
+            padding: 40px;
+            background: linear-gradient(135deg, #2d3436, #485460);
+            color: white;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+        }
+        .export-steps {
+            text-align: left;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group { display: flex; gap: 10px; justify-content: center; margin-top: 25px; }
+        button {
+            padding: 14px 28px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-main { background: var(--dark); color: white; }
+        .btn-download { background: #00b894; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1 style="text-align:center; margin-bottom: 0;">🎯 Mon Propulseur Ikigai</h1>
+    <p style="text-align:center; color: #636e72;">Clarifie ta vision et agis.</p>
+    
+    <div class="grid">
+        <div class="card c-love"><strong>❤️ J'AIME</strong><textarea id="in-love" placeholder="Passion..."></textarea></div>
+        <div class="card c-good"><strong>⭐ TALENTS</strong><textarea id="in-good" placeholder="Compétences..."></textarea></div>
+        <div class="card c-need"><strong>🌍 BESOINS</strong><textarea id="in-need" placeholder="Utilité..."></textarea></div>
+        <div class="card c-paid"><strong>💰 REVENUS</strong><textarea id="in-paid" placeholder="Services..."></textarea></div>
+    </div>
+
+    <div class="action-steps">
+        <h3>🚀 Mon Plan d'Action (3 étapes)</h3>
+        <input type="text" id="step1" class="action-input" placeholder="Étape 1 : Ex: Créer mon portfolio">
+        <input type="text" id="step2" class="action-input" placeholder="Étape 2 : Ex: Contacter 3 clients potentiels">
+        <input type="text" id="step3" class="action-input" placeholder="Étape 3 : Ex: Lancer ma première offre">
+    </div>
+
+    <div class="button-group">
+        <button class="btn-main" onclick="generer()">Générer ma Feuille de Route</button>
+    </div>
+
+    <div id="ikigai-capture">
+        <h2 style="color: #ffeaa7; margin-bottom: 10px;">MON PROJET DE VIE</h2>
+        <div id="ikigai-content" style="font-size: 1.2rem; font-weight: 300;"></div>
+        
+        <div class="export-steps">
+            <h4 style="margin: 0 0 10px 0; color: #55efc4;">PROCHAINES ÉTAPES :</h4>
+            <ul id="list-steps" style="margin: 0; padding-left: 20px;"></ul>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">Fait le <span id="date-display"></span></p>
+    </div>
+
+    <div class="button-group" style="margin-top: 20px;">
+        <button id="dl-btn" class="btn-download" style="display:none" onclick="telecharger()">Télécharger mon Plan (PNG)</button>
+    </div>
+</div>
+
+<script>
+    function generer() {
+        const love = document.getElementById('in-love').value;
+        const good = document.getElementById('in-good').value;
+        const need = document.getElementById('in-need').value;
+        const paid = document.getElementById('in-paid').value;
+
+        const s1 = document.getElementById('step1').value;
+        const s2 = document.getElementById('step2').value;
+        const s3 = document.getElementById('step3').value;
+
+        if(!love || !good || !need || !paid) return alert("Remplis ton Ikigai d'abord !");
+
+        // Remplissage texte
+        document.getElementById('ikigai-content').innerHTML = `
+            "Je vais utiliser mon talent pour <strong>${good}</strong> pour servir 
+            <strong>${need}</strong>, car j'aime <strong>${love}</strong> 
+            et je souhaite construire une activité via <strong>${paid}</strong>."
+        `;
+        
+        // Remplissage liste actions
+        const list = document.getElementById('list-steps');
+        list.innerHTML = "";
+        if(s1) list.innerHTML += `<li>${s1}</li>`;
+        if(s2) list.innerHTML += `<li>${s2}</li>`;
+        if(s3) list.innerHTML += `<li>${s3}</li>`;
+
+        document.getElementById('date-display').innerText = new Date().toLocaleDateString();
+        document.getElementById('ikigai-capture').style.display = 'block';
+        document.getElementById('dl-btn').style.display = 'block';
+        
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function telecharger() {
+        const zone = document.getElementById('ikigai-capture');
+        html2canvas(zone).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Ma-Mission-Ikigai.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
+
+</body>
+</html>
